@@ -41,7 +41,7 @@ export const useSelectionStore = create<SelectionState>()((set) => ({
       } else {
         _indices.push(val);
       }
-      return { indices: _indices };
+      return { indices: _indices.sort() };
     });
   },
   resetSelection: () => {

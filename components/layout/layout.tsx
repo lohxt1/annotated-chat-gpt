@@ -15,7 +15,7 @@ const Layout: React.FC<Props> = (props) => (
         "bg-white text-black dark:bg-black dark:text-white",
       )}
     >
-      {/* <Header /> */}
+      <Header />
       {props.children}
       {/* <Footer /> */}
     </div>

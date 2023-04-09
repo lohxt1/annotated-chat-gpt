@@ -13,25 +13,31 @@ const Blocks = ({ input: text }) => {
 
   // Split blocks by spaces
   const blocks = text
-    .replace(/[\n\t\r]/g, " ")
-    // .replace(/[\t]/g, " ")
-    // .replace(/[\r]/g, " ")
-    .split(" ")
-    .filter((_) => _.length > 0);
+    // .replace(/[\n]/g, " \n")
+    // .replace(/[\t]/g, " \t")
+    // .replace(/[\r]/g, " \r")
+    .split("\n")
+    .map((_) => _.split(" ").filter((_) => _.length > 0));
+
+  const getIndex = (idx, jdx) => {
+    return blocks.slice(0, idx).flat().length + jdx;
+  };
 
   return (
     <>
       <div className="ml-4 mt-4 flex flex-row text-xs">
         <label className="mr-1 text-slate-300 underline decoration-dashed dark:text-slate-500">
-          Select the text to start tagging
+          Click on words to create a prompt hint.
         </label>
         <label className="underline"></label>
       </div>
-      <div className="align-start mb-4 flex select-none flex-wrap content-start items-start justify-start px-4 leading-8">
-        {blocks.map((block, idx) => (
-          <Block block={block} idx={idx} />
-        ))}
-      </div>
+      {blocks.map((line, idx) => (
+        <div className="align-start mb-2 flex select-none flex-wrap content-start items-start justify-start px-4 leading-8">
+          {line.map((block, jdx) => (
+            <Block block={block} idx={getIndex(idx, jdx)} />
+          ))}
+        </div>
+      ))}
       <AddAnnotation text={text} />
     </>
   );
@@ -52,6 +58,7 @@ const Block = ({ block, idx }: { block: string; idx: number }) => {
     setBlockMovingIdx,
     blockMovingIdx,
     indices,
+    setIndices,
   } = useSelectionStore();
 
   const { tag } = useFeedbackStore();
@@ -85,7 +92,7 @@ const Block = ({ block, idx }: { block: string; idx: number }) => {
   const _block = convertNewLines(block);
 
   return (
-    <span
+    <div
       className={cn(
         "relative",
         "pr-1",
@@ -98,9 +105,9 @@ const Block = ({ block, idx }: { block: string; idx: number }) => {
       style={{ background: selected || highlight ? tag?.color : "transparent" }}
     >
       <span className="absolute top-0 left-0 h-full w-full" ref={ref}></span>
-      <span></span>
       {block === " " ? "\u00A0" : block}
-    </span>
+      <br />
+    </div>
   );
 };
 
@@ -120,14 +127,14 @@ const AddAnnotation = ({ text }) => {
   return (
     <div className="flex flex-row">
       <button
-        className="mx-4 my-4 mr-2 w-fit rounded-sm border border-slate-500 px-2 py-1 disabled:opacity-50"
+        className="mx-4 my-4 mr-2 w-fit rounded-sm border border-gray-800 px-2 py-1 disabled:opacity-50 dark:border-gray-200"
         onClick={() => resetSelection()}
         disabled={indices.length <= 0}
       >
         Reset
       </button>
       <button
-        className="mx-4 my-4 w-fit rounded-sm border border-slate-500 px-2 py-1 disabled:opacity-50"
+        className="mx-4 my-4 w-fit rounded-sm border border-gray-800 px-2 py-1 disabled:opacity-50 dark:border-gray-200"
         onClick={_handleClick}
         disabled={indices.length <= 0}
       >

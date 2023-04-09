@@ -23,6 +23,7 @@
     "eventsource-parser": "^1.0.0",
     "fathom-client": "^3.5.0",
     "framer-motion": "^10.6.1",
+    "nanoid": "^4.0.2",
     "next": "latest",
     "next-themes": "^0.2.1",
     "openai": "^3.2.1",

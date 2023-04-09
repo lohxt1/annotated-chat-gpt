@@ -3,6 +3,7 @@ import {
   ReconnectInterval,
   createParser,
 } from "eventsource-parser";
+import { useKeyStore } from "stores/key";
 
 export type ChatGPTAgent = "user" | "system" | "assistant";
 
@@ -23,17 +24,19 @@ export interface OpenAIStreamPayload {
   stop?: string[];
   user?: string;
   n: number;
+  apikey: string;
 }
 
 export async function OpenAIStream(payload: OpenAIStreamPayload) {
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
+  const { apikey, ..._payload } = payload;
 
   let counter = 0;
 
   const requestHeaders: Record<string, string> = {
     "Content-Type": "application/json",
-    Authorization: `Bearer ${process.env.OPENAI_API_KEY ?? ""}`,
+    Authorization: `Bearer ${apikey ?? ""}`,
   };
 
   if (process.env.OPENAI_API_ORG) {
@@ -43,7 +46,7 @@ export async function OpenAIStream(payload: OpenAIStreamPayload) {
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
     headers: requestHeaders,
     method: "POST",
-    body: JSON.stringify(payload),
+    body: JSON.stringify(_payload),
   });
 
   const stream = new ReadableStream({

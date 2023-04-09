@@ -85,17 +85,31 @@ const getFeedback = ({ annotations, tags }) => {
 
   _grouped =
     Object.keys(_grouped).length > 0
-      ? `${"Fix the answer based on the below feedback.\r\n```\r\n"}${Object.keys(
-          _grouped,
-        )
+      ? `${Object.keys(_grouped)
           .map(
             (key) =>
-              `\r\n${key} (${
+              `${
                 tags.find((tag) => tag.label == key)?.instruction
-              })\r\n${_grouped[key].map((_) => `- ${_.text}`).join(`\r\n`)}`,
+              }${"\r\n```\r\n"}${_grouped[key]
+                .map((_) => `${_.text}`)
+                .join(`; `)}${"\r\n```\r\n\r\n"}`,
           )
-          .join("\r\n")}${"\r\n```"}`
+          .join("\r\n")}`
       : [];
+
+  // _grouped =
+  // Object.keys(_grouped).length > 0
+  //   ? `${"Fix the answer confining to the below feedback.\r\n```\r\n"}${Object.keys(
+  //       _grouped,
+  //     )
+  //       .map(
+  //         (key) =>
+  //           `\r\n${key} (${
+  //             tags.find((tag) => tag.label == key)?.instruction
+  //           })\r\n${_grouped[key].map((_) => `- ${_.text}`).join(`\r\n`)}`,
+  //       )
+  //       .join("\r\n")}${"\r\n```"}`
+  //   : [];
 
   return _grouped;
 };

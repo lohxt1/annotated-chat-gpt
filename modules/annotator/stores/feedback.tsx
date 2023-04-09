@@ -20,11 +20,16 @@ interface FeedbackState {
 
 const initialState = {
   tag: {
-    label: "Positive",
-    instruction: "more of this.",
+    label: "Summarize",
+    instruction: "Summarize the above text based on the hint.",
     color: "#37bc9b",
   },
   tags: [
+    {
+      label: "Summarize",
+      instruction: "Summarize the above text based on the hint.",
+      color: "#37bc9b",
+    },
     {
       label: "Positive",
       instruction: "I want to see more of this.",
@@ -46,11 +51,16 @@ const initialState = {
 
 export const useFeedbackStore = create<FeedbackState>()((set) => ({
   tag: {
-    label: "Positive",
-    instruction: "more of this.",
+    label: "Summarize",
+    instruction: "Summarize the above text based on the hint.",
     color: "#37bc9b",
   },
   tags: [
+    {
+      label: "Summarize",
+      instruction: "Summarize the above text based on the hint.",
+      color: "#37bc9b",
+    },
     {
       label: "Positive",
       instruction: "I want to see more of this.",

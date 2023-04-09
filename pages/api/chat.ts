@@ -1,17 +1,17 @@
 import { ChatGPTMessage } from "@/components/chatLine";
 import { OpenAIStream, OpenAIStreamPayload } from "@/utils/openaiStream";
 
-// break the app if the API key is missing
-if (!process.env.OPENAI_API_KEY) {
-  throw new Error("Missing Environment Variable OPENAI_API_KEY");
-}
-
 export const config = {
   runtime: "edge",
 };
 
 const handler = async (req: Request): Promise<Response> => {
   const body = await req.json();
+
+  // break the app if the API key is missing
+  if (!body?.apikey) {
+    throw new Error("Missing OPENAI_API_KEY");
+  }
 
   const messages: ChatGPTMessage[] = [
     {
@@ -39,6 +39,7 @@ const handler = async (req: Request): Promise<Response> => {
     stream: true,
     user: body?.user,
     n: 1,
+    apikey: body?.apikey,
   };
 
   const stream = await OpenAIStream(payload);
