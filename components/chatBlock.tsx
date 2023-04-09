@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import Annotator from "@/modules/annotator";
-import { useHistoryStore } from "stores/history";
 import { cn } from "@/utils/tailwind";
 
 type ChatGPTAgent = "user" | "system" | "assistant";
@@ -161,7 +160,7 @@ const ChatLine = ({
           ) : (
             <p
               className={cn(
-                "leading-8",
+                "text-sm leading-6 md:text-base md:leading-8",
                 role == "assistant" ? "" : "text-gray-500",
               )}
             >
@@ -225,7 +224,10 @@ const InputEdit = (props) => {
           style={{
             height: textareaHeight ? `${textareaHeight}px` : "auto",
           }}
-          className="h-auto w-full bg-transparent leading-8 outline-none focus:outline-none"
+          className={cn(
+            "h-auto w-full bg-transparent outline-none focus:outline-none",
+            "text-sm leading-6 md:text-base md:leading-8",
+          )}
           value={input}
           onChange={(e) => {
             setInput(e.target.value);

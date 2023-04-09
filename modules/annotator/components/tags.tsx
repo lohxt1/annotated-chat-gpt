@@ -42,7 +42,7 @@ const Tags = () => {
         className="flex w-full flex-row flex-wrap"
       >
         {tags.map((_tag, idx) => (
-          <div className="flex w-[22%] flex-row px-2 py-2">
+          <div className="flex w-[100%] flex-row px-2 py-2 md:w-[22%]">
             <RadioGroupItem
               className="mt-1"
               value={_tag?.label}
@@ -93,7 +93,7 @@ const Tags = () => {
               </label>
               <label className="underline"></label>
             </div>
-            <div className="align-end my-4 ml-2 flex flex-row items-end text-xs ">
+            <div className="md:align-end my-4 ml-2 flex flex-col text-xs md:flex-row md:items-end ">
               <div className="mr-4 flex flex-col">
                 <label>Label</label>
                 <input
@@ -104,7 +104,7 @@ const Tags = () => {
                   }}
                 />
               </div>
-              <div className="flex flex-col">
+              <div className="mt-2 flex flex-col md:mt-0">
                 <label>Instruction</label>
                 <input
                   className="selection-none mt-1 h-[32px] w-[250px] border border-gray-200 py-2 px-2"
@@ -114,24 +114,26 @@ const Tags = () => {
                   }}
                 />
               </div>
-              <button
-                className="ml-2 h-[32px] rounded-sm border border-gray-200 px-2 py-1"
-                onClick={_handleAdd}
-              >
-                Add
-              </button>
-              <button
-                className="ml-2 h-[32px] rounded-sm border border-gray-200 px-2 py-1"
-                onClick={(e) => {
-                  toggleAddTagInputs(false);
-                }}
-              >
-                Cancel
-              </button>
+              <div className="flex flex-row">
+                <button
+                  className="mt-4 h-[32px] w-fit rounded-sm border border-gray-200 px-2 py-1 md:ml-2 md:mt-0"
+                  onClick={_handleAdd}
+                >
+                  Add
+                </button>
+                <button
+                  className="ml-2 mt-4 h-[32px] w-fit rounded-sm border border-gray-200 px-2 py-1 md:mt-0"
+                  onClick={(e) => {
+                    toggleAddTagInputs(false);
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </>
         ) : (
-          <div className="flex w-[22%] flex-row px-2 py-2">
+          <div className="flex w-fit flex-row px-2 py-2 md:w-[22%]">
             <div className="relative ml-1 flex w-fit flex-col text-sm">
               <button
                 className="rounded-sm border border-gray-200 px-2 py-1"

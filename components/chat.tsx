@@ -102,10 +102,10 @@ export function Chat() {
               Type a message to start the conversation
             </div>
           )}
-          <div className="h-18 relative flex w-full md:h-24"></div>
+          <div className="relative flex h-[4.5rem] w-full md:h-[6rem]"></div>
           <ScrollToBlock loading={loading} messages={messages} />
         </div>
-        <div className="align-center h-18 absolute bottom-0 left-0 flex w-full items-center justify-center border-t border-gray-100 bg-white pt-2 dark:border-gray-900 dark:bg-black md:h-24">
+        <div className="align-center absolute bottom-0 left-0 flex h-[4.5rem] w-full items-center justify-center border-t border-gray-100 bg-white pt-2 dark:border-gray-900 dark:bg-black md:h-[6rem]">
           <InputMessage sendMessage={sendMessage} />
         </div>
       </div>
