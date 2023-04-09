@@ -4,11 +4,12 @@ import { persist } from "zustand/middleware";
 
 interface HistoryState {
   currentChatId: string;
-  setCurrentChatId: (val) => void;
+  setCurrentChatId: (val?) => void;
   history: any;
   messages: any;
   sliceMessages: (val) => void;
   setHistory: (val) => void;
+  deleteHistory: (val) => void;
 }
 
 export const useHistoryStore = create<HistoryState>()(
@@ -48,6 +49,21 @@ export const useHistoryStore = create<HistoryState>()(
               messages: val || [],
             };
           }
+        });
+      },
+      deleteHistory: (val) => {
+        set((state) => {
+          let _history = { ...state.history };
+          delete _history[val];
+
+          let _messages = [...state.messages];
+          if (val == state.currentChatId) {
+            _messages = [];
+          }
+          return {
+            history: _history,
+            messages: _messages,
+          };
         });
       },
     }),

@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import Annotator from "@/modules/annotator";
 import { useHistoryStore } from "stores/history";
 import { cn } from "@/utils/tailwind";
-import Feedback from "./feedback";
 
 type ChatGPTAgent = "user" | "system" | "assistant";
 
@@ -11,40 +10,110 @@ export interface ChatGPTMessage {
   content: string;
 }
 
-// loading placeholder animation for the chat line
-export const LoadingChatLine = () => (
-  <div
-    className={
-      "relative float-left clear-both w-full animate-pulse border-b border-gray-100 px-2 dark:border-gray-900"
-    }
-  >
-    <div className="mb-5 flex w-full flex-row flex-wrap py-2">
-      <div className="flex w-full flex-row">
-        <p className="font-large text-xxl mr-2 text-gray-900 dark:text-gray-100">
-          <div className="align-center flex h-6 w-6 items-center justify-center rounded-sm border border-gray-300 text-center text-xs">
-            AI
-          </div>
-        </p>
-        <div className="w-full space-y-4 pt-4">
-          <div className="grid grid-cols-3 gap-4">
-            <div className="col-span-2 h-2 rounded bg-zinc-500"></div>
-            <div className="col-span-1 h-2 rounded bg-zinc-500"></div>
-          </div>
-          <div className="h-2 rounded bg-zinc-500"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-);
+interface ChatBlockProps extends ChatGPTMessage {
+  sendMessage: (string) => void;
+  index: number;
+}
 
-// util helper to convert new lines to <br /> tags
-const convertNewLines = (text: string) =>
-  text.split("\n").map((line, i) => (
-    <span key={i}>
-      {line}
-      <br />
-    </span>
-  ));
+export const ChatBlock = ({
+  role = "assistant",
+  content,
+  sendMessage,
+  index,
+}: ChatBlockProps) => {
+  const [showAnnotator, toggleAnnotator] = useState(false);
+  const [feedbackOutput, setFeedbackOutput] = useState(null);
+
+  return (
+    <div className="relative flex flex-col border-b border-gray-100 dark:border-gray-900">
+      {showAnnotator ? (
+        <>
+          {/* Output annotator module */}
+          <Annotator
+            input={content}
+            setOutput={(v) => {
+              setFeedbackOutput(v);
+            }}
+          />
+          {/* Annotation string */}
+          {feedbackOutput && feedbackOutput.length > 0 ? (
+            <>
+              <Feedback feedbackOutput={feedbackOutput} />
+              <button
+                className="mx-4 mb-4 mr-2 w-fit rounded-sm border border-slate-500 px-2 py-1 disabled:opacity-50"
+                onClick={() => {
+                  sendMessage(feedbackOutput, index);
+                  toggleAnnotator((_) => !_);
+                }}
+              >
+                Submit
+              </button>
+            </>
+          ) : null}
+        </>
+      ) : (
+        <ChatLine
+          role={role}
+          content={content}
+          sendMessage={sendMessage}
+          index={index}
+        />
+      )}
+      {role == "assistant" && (
+        <>
+          {showAnnotator ? (
+            <button
+              className="absolute top-0 right-0 mx-1 my-1 w-fit rounded-sm px-2 py-1 text-2xl disabled:opacity-50"
+              onClick={() => toggleAnnotator((_) => !_)}
+            >
+              ×
+            </button>
+          ) : (
+            <button
+              className="mx-4 ml-10 mb-4 mr-2 w-fit rounded-sm border border-slate-500 px-2 py-1 disabled:opacity-50"
+              onClick={() => toggleAnnotator((_) => !_)}
+            >
+              Add Hints
+            </button>
+          )}
+        </>
+      )}
+    </div>
+  );
+};
+
+const Feedback = (props) => {
+  const { feedbackOutput } = props;
+  const textareaRef = useRef<HTMLTextAreaElement>();
+  const [textareaHeight, setTextareaHeight] = useState(0);
+
+  useEffect(() => {
+    if (textareaRef?.current?.scrollHeight) {
+      setTextareaHeight(textareaRef.current.scrollHeight);
+    }
+  }, [feedbackOutput]);
+
+  return (
+    <div className="mt-2 flex h-fit w-full flex-col border-t border-gray-100 p-4 dark:border-gray-900">
+      <>
+        <div className="flex flex-row text-xs">
+          <label className="mr-1 text-slate-300 underline decoration-dashed dark:text-slate-500">
+            Feedback Prompt
+          </label>
+        </div>
+        <textarea
+          ref={textareaRef}
+          style={{
+            height: textareaHeight ? `${textareaHeight}px` : "auto",
+          }}
+          className="mt-4 h-auto w-full border border-gray-500 bg-transparent p-2"
+          // value={JSON.stringify(feedbackOutput, null, 4)}
+          value={feedbackOutput}
+        />
+      </>
+    </div>
+  );
+};
 
 const ChatLine = ({
   role = "assistant",
@@ -55,6 +124,16 @@ const ChatLine = ({
   if (!content) {
     return null;
   }
+
+  // util helper to convert new lines to <br /> tags
+  const convertNewLines = (text: string) =>
+    text.split("\n").map((line, i) => (
+      <span key={i}>
+        {line}
+        <br />
+      </span>
+    ));
+
   const formatteMessage = convertNewLines(content);
 
   const [edit, toggleEdit] = useState(false);
@@ -121,81 +200,10 @@ const ChatLine = ({
   );
 };
 
-interface ChatBlockProps extends ChatGPTMessage {
-  sendMessage: (string) => void;
-  index: number;
-}
-
-export const ChatBlock = ({
-  role = "assistant",
-  content,
-  sendMessage,
-  index,
-}: ChatBlockProps) => {
-  const [showAnnotator, toggleAnnotator] = useState(false);
-  const [feedbackOutput, setFeedbackOutput] = useState(null);
-
-  return (
-    <div className="relative flex flex-col border-b border-gray-100 dark:border-gray-900">
-      {showAnnotator ? (
-        <>
-          <Annotator
-            input={content}
-            setOutput={(v) => {
-              setFeedbackOutput(v);
-            }}
-          />
-          {feedbackOutput && feedbackOutput.length > 0 ? (
-            <>
-              <Feedback feedbackOutput={feedbackOutput} />
-              <button
-                className="mx-4 mb-4 mr-2 w-fit rounded-sm border border-slate-500 px-2 py-1 disabled:opacity-50"
-                onClick={() => {
-                  sendMessage(feedbackOutput, index);
-                  toggleAnnotator((_) => !_);
-                }}
-              >
-                Submit
-              </button>
-            </>
-          ) : null}
-        </>
-      ) : (
-        <ChatLine
-          role={role}
-          content={content}
-          sendMessage={sendMessage}
-          index={index}
-        />
-      )}
-      {role == "assistant" && (
-        <>
-          {showAnnotator ? (
-            <button
-              className="absolute top-0 right-0 mx-1 my-1 w-fit rounded-sm px-2 py-1 text-2xl disabled:opacity-50"
-              onClick={() => toggleAnnotator((_) => !_)}
-            >
-              ×
-            </button>
-          ) : (
-            <button
-              className="mx-4 ml-10 mb-4 mr-2 w-fit rounded-sm border border-slate-500 px-2 py-1 disabled:opacity-50"
-              onClick={() => toggleAnnotator((_) => !_)}
-            >
-              Add Hints
-            </button>
-          )}
-        </>
-      )}
-    </div>
-  );
-};
-
 const InputEdit = (props) => {
   const { content, sendMessage, index } = props;
   const textareaRef = useRef<HTMLTextAreaElement>();
   const [textareaHeight, setTextareaHeight] = useState(0);
-  const { sliceMessages } = useHistoryStore();
 
   const [input, setInput] = useState(content);
 
@@ -207,7 +215,6 @@ const InputEdit = (props) => {
 
   const _handleSubmit = (e) => {
     sendMessage(input, index);
-    // sliceMessages(index);
   };
 
   return (
@@ -218,8 +225,7 @@ const InputEdit = (props) => {
           style={{
             height: textareaHeight ? `${textareaHeight}px` : "auto",
           }}
-          className="h-auto w-full bg-transparent leading-8"
-          // value={JSON.stringify(feedbackOutput, null, 4)}
+          className="h-auto w-full bg-transparent leading-8 outline-none focus:outline-none"
           value={input}
           onChange={(e) => {
             setInput(e.target.value);
@@ -235,5 +241,3 @@ const InputEdit = (props) => {
     </div>
   );
 };
-
-export default Feedback;

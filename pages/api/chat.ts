@@ -1,4 +1,4 @@
-import { ChatGPTMessage } from "@/components/chatLine";
+import { ChatGPTMessage } from "@/components/chatBlock";
 import { OpenAIStream, OpenAIStreamPayload } from "@/utils/openaiStream";
 
 export const config = {

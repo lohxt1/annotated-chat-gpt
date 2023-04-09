@@ -1,59 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useHistoryStore } from "stores/history";
 import { useKeyStore } from "stores/key";
-import { ChatBlock, type ChatGPTMessage, LoadingChatLine } from "./chatLine";
-
-const InputMessage = ({ input, setInput, sendMessage }: any) => (
-  <div className="clear-both mt-6 flex w-full">
-    <input
-      type="text"
-      aria-label="chat input"
-      required
-      placeholder="Send a message..."
-      className="ml-2 min-w-0 flex-auto appearance-none border border-gray-200 bg-white px-3 py-[calc(theme(spacing.2)-1px)] shadow-md shadow-zinc-800/5 placeholder:text-zinc-400 focus:outline-none dark:border-gray-900 dark:border-gray-900 dark:bg-black sm:text-sm"
-      value={input}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" && input.length > 0) {
-          sendMessage(input);
-          setInput("");
-        }
-      }}
-      onChange={(e) => {
-        setInput(e.target.value);
-      }}
-    />
-    <button
-      type="submit"
-      className="mx-2 flex-none"
-      disabled={input.length <= 0}
-      onClick={() => {
-        if (input.length <= 0) return;
-        sendMessage(input);
-        setInput("");
-      }}
-    >
-      →
-    </button>
-    <button
-      type="submit"
-      className="mx-2 flex-none"
-      onClick={() => {
-        // resendMessage(input);
-        // setInput("");
-      }}
-    >
-      ↻
-    </button>
-  </div>
-);
+import { ChatBlock, type ChatGPTMessage } from "./chatBlock";
 
 export function Chat() {
-  // const [messages, setMessages] = useState<ChatGPTMessage[]>([]);
-  const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+
   const { apikey } = useKeyStore();
-  const { currentChatId, setCurrentChatId, messages, setHistory, history } =
-    useHistoryStore();
+  const { setCurrentChatId, messages, setHistory } = useHistoryStore();
 
   useEffect(() => {
     // Initiate new chat
@@ -61,15 +15,24 @@ export function Chat() {
   }, []);
 
   // send message to API /api/chat endpoint
-  const sendMessage = async (message: string, index: number) => {
+  const sendMessage = async (message: string, index?: number) => {
     setLoading(true);
+
+    // if a previous message is edited and submitted, ignore all the following messages.
     let _index = index >= 0 ? index : 1000;
+    let _messages = messages.slice(0, _index + 1);
+
+    // append the new/edited message to the list of messages
     const newMessages = [
-      ...messages.slice(0, _index + 1),
+      ..._messages,
       { role: "user", content: message } as ChatGPTMessage,
     ];
+
+    // update the store
     setHistory(newMessages);
-    const last10messages = newMessages.slice(-10); // remember last 10 messages
+
+    // last 10 messages will be sent for context
+    const last10messages = newMessages.slice(-10);
 
     const response = await fetch("/api/chat", {
       method: "POST",
@@ -112,9 +75,10 @@ export function Chat() {
         { role: "assistant", content: lastMessage } as ChatGPTMessage,
       ];
 
-      // setMessages(_messages);
+      // update the store
       setHistory(_messages);
 
+      // reset loading status
       setLoading(false);
     }
   };
@@ -142,24 +106,84 @@ export function Chat() {
           <ScrollToBlock loading={loading} messages={messages} />
         </div>
         <div className="align-center h-18 absolute bottom-0 left-0 flex w-full items-center justify-center border-t border-gray-100 bg-white pt-2 dark:border-gray-900 dark:bg-black md:h-24">
-          <InputMessage
-            input={input}
-            setInput={setInput}
-            sendMessage={sendMessage}
-          />
+          <InputMessage sendMessage={sendMessage} />
         </div>
       </div>
     </div>
   );
 }
 
+// loading placeholder animation for the chat line
+const LoadingChatLine = () => (
+  <div
+    className={
+      "relative float-left clear-both w-full animate-pulse border-b border-gray-100 px-2 dark:border-gray-900"
+    }
+  >
+    <div className="mb-5 flex w-full flex-row flex-wrap py-2">
+      <div className="flex w-full flex-row">
+        <p className="font-large text-xxl mr-2 text-gray-900 dark:text-gray-100">
+          <div className="align-center flex h-6 w-6 items-center justify-center rounded-sm border border-gray-300 text-center text-xs">
+            AI
+          </div>
+        </p>
+        <div className="w-full space-y-4 pt-4">
+          <div className="grid grid-cols-3 gap-4">
+            <div className="col-span-2 h-2 rounded bg-zinc-500"></div>
+            <div className="col-span-1 h-2 rounded bg-zinc-500"></div>
+          </div>
+          <div className="h-2 rounded bg-zinc-500"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
 const ScrollToBlock = (props) => {
   const { loading, messages } = props;
-  const ref = useRef();
+  const ref = useRef<HTMLDivElement>();
 
   useEffect(() => {
     ref.current.scrollIntoView({ behavior: "smooth" });
   }, [loading, messages]);
 
   return <div className="relative flex h-[1px] w-full" ref={ref}></div>;
+};
+
+const InputMessage = ({ sendMessage }: any) => {
+  const [input, setInput] = useState("");
+
+  return (
+    <div className="clear-both mt-6 flex w-full">
+      <input
+        type="text"
+        aria-label="chat input"
+        required
+        placeholder="Send a message..."
+        className="ml-2 min-w-0 flex-auto appearance-none border border-gray-200 bg-white px-3 py-[calc(theme(spacing.2)-1px)] shadow-md shadow-zinc-800/5 placeholder:text-zinc-400 focus:outline-none dark:border-gray-900 dark:border-gray-900 dark:bg-black sm:text-sm"
+        value={input}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && input.length > 0) {
+            sendMessage(input);
+            setInput("");
+          }
+        }}
+        onChange={(e) => {
+          setInput(e.target.value);
+        }}
+      />
+      <button
+        type="submit"
+        className="mx-2 flex-none"
+        disabled={input.length <= 0}
+        onClick={() => {
+          if (input.length <= 0) return;
+          sendMessage(input);
+          setInput("");
+        }}
+      >
+        →
+      </button>
+    </div>
+  );
 };
