@@ -6,11 +6,12 @@
 <br />
 <img align="center" src="https://lohxt1.github.io/_assets/stimulusprompt3.png" alt="chat minimal 2"/>
 <h1>
-Directional stimulus prompting interface
+~ annotated-chat-gpt ~
 </h1>
   <a href="https://github.com/trpc/trpc/blob/main/LICENSE">
     <img alt="MIT License" src="https://img.shields.io/github/license/trpc/trpc" />
   </a>
+  <p>A minimal chat gpt interface with an ability to provided annoated feedback prompts for more refined outputs. WIP. 
 </div>
 
 ## Tech Stack
@@ -27,8 +28,8 @@ To run the code locally, open _Terminal_ in your `projects` folder and take the 
 
 ```bash
 # STEP 1: Get sources from GitHub
-$ git clone https://github.com/lohxt1/directional-stimulus-prompting.git
-$ cd directional-stimulus-prompting
+$ git clone https://github.com/lohxt1/annotated-chat-gpt.git
+$ cd annotated-chat-gpt
 
 # STEP 2: Install the requirements
 $ npm install
